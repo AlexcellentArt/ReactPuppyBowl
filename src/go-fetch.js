@@ -1,10 +1,7 @@
+export as namespace GoFetch;
 const cohortName = "2407-FTB-ET-WEB-FT";
 const API_URL = `https://fsa-puppy-bowl.herokuapp.com/api/${cohortName}`;
-const puppyHolder = document.querySelector("main");
-const state = {
-  teams:{null:"Lone Pup"}
-}
-
+// might rework into hooks later
 /**
  * Fetches all players from the API.
  * @returns {Object[]} the array of player objects
@@ -81,19 +78,10 @@ const removePlayer = async (playerId) => {
     );
   }
 };
+
 /**
- *  Updates local state of what teams there are.
- * */
-const updateTeams = async () =>{
-    //get teams
-    teams = await fetchTeams();
-    teams.forEach(obj => state.teams[obj.id] = obj.name)
-    console.log("Teams Updated")
-    console.table(teams)
-    console.table(state)
-}
-/**
- * fetches teams
+ * fetches teams.
+ * @returns {Object}
 */
 const fetchTeams = async () => {
   try {
@@ -108,5 +96,26 @@ const fetchTeams = async () => {
     return {}
   }
 };
+/**
+ * Fetches teams then creates and returns a lookup object in the format of {id:name,}. If you are not engaging with teams beyond rendering the name in the relevant header, then use this over teams.
+ * @returns {Object}
+*/
+const fetchTeamLookup = async () => {
+  try {
+    const response = await fetch(
+      `https://fsa-puppy-bowl.herokuapp.com/api/${cohortName}/teams`
+    );
+    console.log(response);
+    const json = await response.json();
+    const teamLookup = {null:"Lone Pups"}
+    json.forEach((team) => {
+      teamLookup[team.id] = team.name;
+    });
+    return teamLookup;
+  } catch (error) {
+    console.error(error);
+    return {}
+  }
+};
 
-export {fetchSinglePlayer,fetchAllPlayers,fetchTeams,addNewPlayer,removePlayer}
+module.exports = {fetchSinglePlayer,fetchAllPlayers,fetchTeams,fetchTeamLookup,addNewPlayer,removePlayer}
