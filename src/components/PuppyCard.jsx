@@ -3,12 +3,22 @@ import {useParams,useNavigate,useLocation} from 'react-router-dom';
 import {} from "../go-fetch";
 function PuppyCard(props) {
     const [data, setData] = useState(props.data);
-//   mode only needs to be one thing as they will be rerendered anyway
     const [mode, setMode] = useState(props.mode);
+
+//   mode only needs to be one thing as they will be rerendered anyway
 //   const mode = props.mode;
 //   const data = props.data;
   const nv = useNavigate();
-  const location = useLocation()
+  const params = useParams();
+  if (params === undefined||null)
+  {
+
+  }
+  // useEffect(() => {
+  //   // navigation.addListener('focus', () => {
+  //   //   console.log("reloaded");
+  //   // });
+  // }, [navigation]);
   return (
       <div className="clipCard">
         <h1 className="cardTitle">
@@ -25,9 +35,9 @@ function PuppyCard(props) {
           </p>
           <button>Delete Puppy</button>
           {mode === "single" ? (
-            <button onClick={() => {nv("../players"); nv(0)}}>Go Back</button>
+            <button onClick={() => {props.setMode("single");nv("../players");nv(0)}}>Go Back</button>
           ) : (
-            <button onClick={() => {nv("/players/"+data.id); nv(0)} }>
+            <button onClick={() => {props.setMode("multi");nv("/players/"+data.id); nv(0)} }>
               View Detail
             </button>
           )}

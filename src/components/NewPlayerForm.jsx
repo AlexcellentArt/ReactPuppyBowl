@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { addNewPlayer, capitalize } from "../go-fetch";
+import { addNewPlayer, capitalize,verifyImageExists } from "../go-fetch";
 import PlayerInput from "./PlayerInput";
 function NewPlayerForm(props) {
   // form data i might refactor to ref later
@@ -19,22 +19,44 @@ function NewPlayerForm(props) {
     const value = 1;
     let allDataValid = true;
     // trim form data via iterable and confirm its validity while also setting the value to empty
-    for (const entry of new FormData(e.target).entries()) {
-      // key = value
-      data[(entry[key] = entry[value].trim())];
-      console.log(e.target[entry[key]]);
-      // verify input
+    console.log("TARGETS")
+    const fD = new FormData(e.target)
+    const validationInfo = [];
+    for (let i = 0; i < e.target.length; i++)
+    {
+      //get key, value, and type attr
+      const key = e.target.elements[i].getAttribute("name")
+      const value = e.target[key].value.trim()
+      const type = e.target[key].getAttribute("type")
+      console.log(`Key: ${key} Value: ${value} Type: ${type === null ? "null or select":type}`)
+      validationInfo.push({key:key,value:value,type:type})
+      //set
+      fD[key] = value
+      // const isValid = await verifyInput(
+      //   type,value
+      // );
+      // validation[key] = isValid;
+      // if (isValid === false) {
+      //   allDataValid = false;
+      // }
+    }
+    // update states
+    setFormData(fD);
+  }
+ async function validateForm(arr){
+  // input is an array of {key:key,value:value,type:type}
+  
+  const validation = {}
+  for (let i = 0; i < e.target.length; i++)
+    {
       const isValid = await verifyInput(
-        e.target[entry[key]].type,
-        entry[value]
+        type,value
       );
-      validation[entry[key]] = isValid;
+      validationData[key] = isValid;
       if (isValid === false) {
         allDataValid = false;
       }
     }
-    // update states
-    setFormData(data);
     setValidationData(validation);
     setAllValid(allDataValid);
     if ((isFirstTry = true)) {
@@ -63,12 +85,9 @@ function NewPlayerForm(props) {
         }
         break;
 
-      case "img": {
+      case "imageUrl": {
         // checking the content-type header
-        fetched = await fetch(inputVal, { method: "HEAD" });
-        if (fetched.type.startsWith("image/")) {
-          res = true;
-        }
+        res = await verifyImageExists(inputVal)
         break;
       }
       default:
@@ -90,7 +109,7 @@ function NewPlayerForm(props) {
     //  value, setFunc
     // if not first try and validation false, add invalid to class
     return (
-      <label htmlFor="" className={createInputClassName()}>
+      <label key={key} id={key} for={key} htmlFor="" className={createInputClassName()}>
         <p>{label !== "" ? label : capitalize(key)}</p>
         <input
           type={type}
@@ -112,7 +131,7 @@ function NewPlayerForm(props) {
   function makeSelect(key, options, label = "") {
     // make options out of keys
     return (
-      <label htmlFor="">
+      <label key={key} id={key} for={key} htmlFor="">
         {label === "" ? capitalize(key) : label}
         <select name={key} id={key}>
           {makeOptions(options)}
@@ -139,8 +158,8 @@ function NewPlayerForm(props) {
       {makeInput("text", "breed")}
       {makeSelect("teamId", props.teamLookup,"Team")}
       {makeSelect("status",["Bench","Field"])}
-      {makeInput("imageUrl", "teamId", "Image")}
-      <button className={allValid ? "" : "disabled"}>Submit</button>
+      {makeInput("imageUrl", "imageUrl", "Image")}
+      <button type="submit" className={allValid ? "" : "disabled"}>Submit</button>
     </form>
   );
 }
