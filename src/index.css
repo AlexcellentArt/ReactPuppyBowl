@@ -6,7 +6,7 @@
 }
 body {
   background-color: burlywood;
-  max-height: 100vh;
+  /* max-height: 100vh; */
   width: 100%;
 }
 img {
@@ -24,28 +24,56 @@ label {
   background-color: lightgoldenrodyellow;
   /* border-radius: 0% 70% 70% 0%;
   padding: 0.2% 1% 0.25%; */
-  border-radius: 15% 0% 0%;
-  align-self: first baseline;
+  /* border-radius: 15% 0% 0%; */
+  /* align-self: first baseline; */
+  align-content: center ;
+  height: 100%;
   border: goldenrod 0.16em ridge;
+  width: -webkit-fill-available;
+  select,input {
+    width: 80%;
+  }
   /* padding: 0.25%; */
 }
 form {
+  position: sticky;
+  z-index: 1;
   background-color: darkgoldenrod;
   padding: 2.5%;
   display: grid;
   width: 100%;
-  grid-template-columns: 0.4fr 3fr;
-  /* gap: 5% 0%; */
-  input:last-of-type{
-    grid-column: span 2;
+  grid-template-columns: 0.7fr 1.3fr; 
+  grid-template-rows: 1.5fr 0.5fr; 
+  gap: 0px 0px; 
+  grid-template-areas: 
+    "select input"
+    "submit submit"; 
+    .formSelect {grid-area: select;}
+    /* >label>{
+      height: 100%;
+      width: 100%;
+    } */
+     div {
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+      align-content: stretch;
+      justify-content: space-evenly;
+      align-items: center;
+     }
+.formInput {grid-area: input; }
+  :last-child{
+    /* grid-column: span 2; */
+    /* grid-row: span 2; */
+    grid-area: submit;
+
   }
-  
 }
 form,main {
   padding: 2%;
   
 }
-button {
+button, navbar * {
   border-color: darkmagenta;
   background-color: rgb(223, 39, 255);
   font-weight: bold;
@@ -54,6 +82,11 @@ button {
   background-color: #69bff8; */
 }
 button:hover{
+  background-color: springgreen;
+  border-color: darkgreen;
+  color: black;
+}
+navbar *:hover{
   background-color: springgreen;
   border-color: darkgreen;
   color: black;
@@ -159,7 +192,7 @@ main {
   color: violet;
   
 }
-.cardTitle {
+.cardTitle{
   background-color: rgb(87, 0, 185);
   border: rgb(82, 13, 146) ridge 0.1em;
   color: yellow;
@@ -227,6 +260,21 @@ main {
     aspect-ratio: 1.5/1;
   }
 }
+.multiRender:has(:only-child){
+  display: block;
+  justify-content:stretch;
+  align-content: center;
+  h3 {
+    padding: 2%;
+    text-decoration: underline overline #1C6EA4;
+        background-color: #0c3d5e;
+        justify-self: stretch;
+        color:#7bf5fb;
+        font-size: xx-large;
+        /* text-wrap: nowrap; */
+        text-align: center;
+  }
+}
 .clipCard {
   clip-path: fill-box;
 }
@@ -240,12 +288,12 @@ main {
 -moz-box-shadow: inset 3px 6px 21px 4px rgba(255, 255, 255, 0.707);
 box-shadow: inset 3px 6px 21px 4px rgba(255, 255, 255, 0.707);
 }
-label,button,input,select {
+label,button,input,select, navbar * {
   -webkit-box-shadow: inset 2px 2px 6px 1px rgba(255, 255, 255, 0.707);
   -moz-box-shadow: inset 2px 2px 6px 1px rgba(255, 255, 255, 0.707);
   box-shadow: inset 2px 2px 6px 1px rgba(255, 255, 255, 0.707);
 }
-form,main,body,.tools{
+form,main,body,.tools,navbar{
   -webkit-box-shadow: inset 2px 2px 6px 1px rgba(255, 255, 255, 0.707);
   -moz-box-shadow: inset 2px 2px 6px 1px rgba(255, 255, 255, 0.707);
   box-shadow: inset 5px 5px 100px 1px rgba(0, 0, 0, 0.629),inset 5px 5px 1px 1px rgba(0, 0, 0, 0.8);
@@ -253,12 +301,79 @@ form,main,body,.tools{
 }
 .tools {
   display: flex;
+  flex-direction: column;
   background-color: #1C6EA4;
   padding: 2%;
   place-content: center;
+  border: black 0.2em solid;
+  > * {
+    
+    margin: 0.25% 0%;
+  }
   * {
     flex: 1 1;
     place-content: center;
     width: 100%;
   }
+  .teamFilters,.searchBar{
+    width: -webkit-fill-available; padding: 0.75%;}
+}
+.teamFilters{
+  display: flex;
+  .toggled{
+    -webkit-box-shadow: inset 2px 2px 6px 1px rgba(255, 255, 255, 0.707);
+    -moz-box-shadow: inset 2px 2px 6px 1px rgba(255, 255, 255, 0.707);
+    box-shadow: inset 5px 5px 5px 1px rgba(0, 0, 0, 0.329),inset 5px 5px 1px 1px rgba(0, 0, 0, 0.1);
+  }
+  button {
+    background-color: greenyellow;
+    border-color: darkgreen;
+    color: black;
+  }
+
+}
+.toggled{
+  -webkit-box-shadow:  inset 5px 5px 100px 1px rgba(0, 0, 0, 0.329),inset 5px 5px 1px 1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow:  inset 5px 5px 100px 1px rgba(0, 0, 0, 0.329),inset 5px 5px 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 5px 5px 100px 1px rgba(0, 0, 0, 0.329),inset 5px 5px 1px 1px rgba(0, 0, 0, 0.1);
+}
+.searchBar{
+  display: flex;
+  flex-direction: row;
+  /* width: 100%; */
+}
+.hidden{
+  display:none;
+}
+.buttonBox{
+  display: flex;
+  flex-direction: column;
+  *{
+    font-size: x-large;
+  }
+}
+tools,form,body{
+  border: black 0.2em solid;
+}
+navbar {
+  position: sticky;
+  display: flex;
+  place-content:stretch  ;
+  width: 100%;
+  /* height: 100%; */
+  background-color: #1C6EA4;
+  padding: 1% 25%;
+  align-content: center;
+  /* z-index: -1; */
+  *{
+    font-size: x-large;
+    margin: 0.25%;
+    width: -webkit-fill-available
+
+  }
+header {
+  place-content:stretch center ;
+  width: fit-content;
+  background-color: #1C6EA4;
+}
 }

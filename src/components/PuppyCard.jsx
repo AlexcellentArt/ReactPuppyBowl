@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import {useParams,useNavigate,useLocation} from 'react-router-dom';
-import {} from "../go-fetch";
+import {removePlayer} from "../go-fetch";
 function PuppyCard(props) {
     const [data, setData] = useState(props.data);
-    const [mode, setMode] = useState(props.mode);
+    const mode = props.mode;
 
 //   mode only needs to be one thing as they will be rerendered anyway
 //   const mode = props.mode;
@@ -19,6 +19,11 @@ function PuppyCard(props) {
   //   //   console.log("reloaded");
   //   // });
   // }, [navigation]);
+ async function removeAndRefetch(){
+    await removePlayer(data.id);
+    // trigger refetch update
+    props.triggerRefetch()
+  }
   return (
       <div className="clipCard">
         <h1 className="cardTitle">
@@ -33,9 +38,9 @@ function PuppyCard(props) {
               ? "Status: " + props.teamLookup[data.teamId]
               : props.teamLookup[data.teamId]}
           </p>
-          <button>Delete Puppy</button>
+          <button onClick={removeAndRefetch}>Delete Puppy</button>
           {mode === "single" ? (
-            <button onClick={() => {props.setMode("single");nv("../players");nv(0)}}>Go Back</button>
+            <button onClick={() => {props.setMode("single");nv("/players");nv(0)}}>Go Back</button>
           ) : (
             <button onClick={() => {props.setMode("multi");nv("/players/"+data.id); nv(0)} }>
               View Detail

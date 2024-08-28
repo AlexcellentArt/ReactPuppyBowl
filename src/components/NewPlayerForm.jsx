@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { addNewPlayer, capitalize,verifyImageExists } from "../go-fetch";
+import { addNewPlayer, capitalize, verifyImageExists } from "../go-fetch";
 import PlayerInput from "./PlayerInput";
 function NewPlayerForm(props) {
   // form data i might refactor to ref later
@@ -8,58 +8,57 @@ function NewPlayerForm(props) {
   const [allValid, setAllValid] = useState(true);
   const [error, setError] = useState();
   const [isFirstTry, setIsFirstTry] = useState(true);
+  const [FormStatus, setFormStatus] = useState("fresh");
+  const form = useRef(null)
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const data = {};
-    const validation = {};
-
-    // have made key and value const for easier readability
-    const key = 0;
-    const value = 1;
-    let allDataValid = true;
     // trim form data via iterable and confirm its validity while also setting the value to empty
-    console.log("TARGETS")
-    const fD = new FormData(e.target)
+    console.log("TARGETS");
+    const fD = new FormData(e.target);
+    const obj = {};
     const validationInfo = [];
-    for (let i = 0; i < e.target.length; i++)
-    {
+    for (let i = 0; i < e.target.length; i++) {
       //get key, value, and type attr
-      const key = e.target.elements[i].getAttribute("name")
-      const value = e.target[key].value.trim()
-      const type = e.target[key].getAttribute("type")
-      console.log(`Key: ${key} Value: ${value} Type: ${type === null ? "null or select":type}`)
-      validationInfo.push({key:key,value:value,type:type})
-      //set
-      fD[key] = value
-      // const isValid = await verifyInput(
-      //   type,value
-      // );
-      // validation[key] = isValid;
-      // if (isValid === false) {
-      //   allDataValid = false;
-      // }
+      const key = e.target.elements[i].getAttribute("name");
+      const type = e.target.elements[i].getAttribute("type");
+      let value = e.target.elements[i].value;
+      // if value is string, trim it
+      if (Object.prototype.toString.call(value) === '[object String]')
+      {
+        value = value.trim()
+      }
+      console.log(`Key: ${key} Value: ${value} Type: ${type}`);
+      if (type !== "submit") {
+        validationInfo.push({ key: key, value: value, type: type });
+        //set
+        fD[key] = value;
+        obj[key] = value
+      }
     }
     // update states
-    setFormData(fD);
+    setFormData(obj);
+    validateForm(validationInfo,obj)
+    setFormStatus("validating")
   }
- async function validateForm(arr){
-  // input is an array of {key:key,value:value,type:type}
-  
-  const validation = {}
-  for (let i = 0; i < e.target.length; i++)
-    {
-      const isValid = await verifyInput(
-        type,value
-      );
-      validationData[key] = isValid;
+  async function validateForm(validationInfo,data) {
+    // input is an array of {key:key,value:value,type:type}
+    let allDataValid = true
+    const validation = {};
+    // const sendOff = {}
+    for (let i = 0; i < validationInfo.length; i++) {
+      const obj = validationInfo[i];
+      const isValid = await verifyInput(obj.type, obj.value);
+      validationData[obj.key] = isValid;
+      // sendOff[obj.key] = obj.value.trim()
+      // if one mismatch is found, set allDataValid to false.
       if (isValid === false) {
         allDataValid = false;
       }
     }
     setValidationData(validation);
     setAllValid(allDataValid);
-    if ((isFirstTry = true)) {
+    if (isFirstTry === true) {
       setIsFirstTry(false);
     }
     // check if allValid. if not, then throw error. Else, add new player
@@ -68,12 +67,26 @@ function NewPlayerForm(props) {
         throw Error("Fields are blank.");
       }
       // try and add new player
-      const res = await addNewPlayer(formData);
+      const res = await addNewPlayer(data);
       if (res === null) {
         throw new Error("Error on server side.");
       }
+      else
+      {
+        console.log("New player added successfully. Updating players.")
+        props.refetch()
+        setFormStatus("needsReset")
+        // log current form elements and then reset
+        console.log(form.current.elements)
+        form.current.reset()
+        setFormStatus("fresh")
+        // set first try to true, as this is a fresh form
+        setIsFirstTry(true)
+
+      }
     } catch (error) {
       setError(error.message);
+      return
     }
   }
   async function verifyInput(key, inputVal) {
@@ -87,7 +100,7 @@ function NewPlayerForm(props) {
 
       case "imageUrl": {
         // checking the content-type header
-        res = await verifyImageExists(inputVal)
+        res = await verifyImageExists(inputVal);
         break;
       }
       default:
@@ -97,11 +110,11 @@ function NewPlayerForm(props) {
     console.log(`${key}'s validity is: ${res}`);
     return res;
   }
-  function createInputClassName(base = "") {
+  function createInputClassName(base = "",key) {
     if (isFirstTry || !validationData[key] === true) {
-      return "";
+      return base;
     } else {
-      return "invalid";
+      return base+" invalid";
     }
   }
   function makeInput(type, key, label = "") {
@@ -109,7 +122,12 @@ function NewPlayerForm(props) {
     //  value, setFunc
     // if not first try and validation false, add invalid to class
     return (
-      <label key={key} id={key} for={key} htmlFor="" className={createInputClassName()}>
+      <label
+        key={key}
+        id={key}
+        for={key}
+        className={createInputClassName("input",key)}
+      >
         <p>{label !== "" ? label : capitalize(key)}</p>
         <input
           type={type}
@@ -131,9 +149,9 @@ function NewPlayerForm(props) {
   function makeSelect(key, options, label = "") {
     // make options out of keys
     return (
-      <label key={key} id={key} for={key} htmlFor="">
+      <label className="select" key={key} id={key} for={key} htmlFor="">
         {label === "" ? capitalize(key) : label}
-        <select name={key} id={key}>
+        <select name={key} key={key} id={key}>
           {makeOptions(options)}
         </select>
       </label>
@@ -151,15 +169,27 @@ function NewPlayerForm(props) {
       });
     }
   }
+ function handleReset(){
+  console.log("handling reset")
+ }
+//  function
+  // reset if needsReset
   return (
-    <form id="new-player-form" onSubmit={handleSubmit}>
+    <form id="new-player-form" onSubmit={handleSubmit} ref={form} onReset={handleReset}>
       {error && <p>{error}</p>}
+      <div className="formInput">
       {makeInput("text", "name")}
       {makeInput("text", "breed")}
-      {makeSelect("teamId", props.teamLookup,"Team")}
-      {makeSelect("status",["Bench","Field"])}
       {makeInput("imageUrl", "imageUrl", "Image")}
-      <button type="submit" className={allValid ? "" : "disabled"}>Submit</button>
+      </div>
+      <div className="formSelect">
+      {makeSelect("teamId", props.teamLookup, "Team")}
+      {makeSelect("status", ["bench", "field"])}
+      </div>
+      <button type="submit" className={allValid ? "" : "disabled"}>
+        Submit
+      </button>
+
     </form>
   );
 }

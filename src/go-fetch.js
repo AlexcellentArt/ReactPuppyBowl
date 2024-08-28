@@ -1,4 +1,4 @@
-export as namespace GoFetch;
+// export as namespace GoFetch;
 const cohortName = "2407-FTB-ET-WEB-FT";
 const API_URL = `https://fsa-puppy-bowl.herokuapp.com/api/${cohortName}`;
 // might rework into hooks later
@@ -9,8 +9,13 @@ const API_URL = `https://fsa-puppy-bowl.herokuapp.com/api/${cohortName}`;
 const fetchAllPlayers = async () => {
   try {
     const response = await fetch(API_URL + "/players");
+    if (!response.ok)
+      {
+        throw new Error(response.statusText)
+      }
     const json = await response.json();
     console.log(json.data.players);
+    
     return json.data.players;
   } catch (err) {
     console.error("Uh oh, trouble fetching players!", err);
@@ -28,6 +33,10 @@ const fetchSinglePlayer = async (playerId) => {
     // TODO
     console.log("FETCHING SINGLE ID: " + playerId);
     const response = await fetch(`${API_URL}/players/${playerId}`);
+    if (!response.ok)
+      {
+        throw new Error(response.statusText)
+      }
     const json = await response.json();
     console.log(json);
     return json.data.player;
@@ -51,6 +60,10 @@ const addNewPlayer = async (playerObj) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(playerObj),
     });
+    if (!response.ok)
+      {
+        throw new Error(response.statusText)
+      }
     const json = await response.json();
     console.log(json);
     return json;
@@ -66,11 +79,14 @@ const addNewPlayer = async (playerObj) => {
  */
 const removePlayer = async (playerId) => {
   try {
-    // TODO
     const response = await fetch(`${API_URL}/players/${playerId}`, {
       method: "DELETE",
     });
     console.log(response.status);
+    if (!response.ok)
+      {
+        throw new Error(response.statusText)
+      }
   } catch (err) {
     console.error(
       `Whoops, trouble removing player #${playerId} from the roster!`,
@@ -89,10 +105,14 @@ const fetchTeams = async () => {
       `https://fsa-puppy-bowl.herokuapp.com/api/${cohortName}/teams`
     );
     console.log(response);
+    if (!response.ok)
+      {
+        throw new Error(response.statusText)
+      }
     const json = await response.json();
     return json.data.teams;
   } catch (error) {
-    console.error(error);
+    console.error("Error Fetching Teams!",error);
     return {}
   }
 };
@@ -101,21 +121,51 @@ const fetchTeams = async () => {
  * @returns {Object}
 */
 const fetchTeamLookup = async () => {
+  const teamLookup = {null:"Lone Pups"}
   try {
     const response = await fetch(
       `https://fsa-puppy-bowl.herokuapp.com/api/${cohortName}/teams`
     );
     console.log(response);
+    if (!response.ok)
+      {
+        throw new Error(response.statusText)
+      }
     const json = await response.json();
-    const teamLookup = {null:"Lone Pups"}
-    json.forEach((team) => {
+    console.log(json)
+    json.data.teams.forEach((team) => {
       teamLookup[team.id] = team.name;
     });
-    return teamLookup;
+    console.log("TEAM LOOKUP MADE")
+    console.table(teamLookup)
+    
   } catch (error) {
-    console.error(error);
-    return {}
+    console.error("TeamLookup Failed to be made.", error);
   }
+  return teamLookup
 };
-
-module.exports = {fetchSinglePlayer,fetchAllPlayers,fetchTeams,fetchTeamLookup,addNewPlayer,removePlayer}
+const verifyImageExists = async (url) =>
+{
+  try {
+    const response =  await fetch(url, { method: "HEAD" });
+    if (response.type.startsWith("image/")) {
+      console.log("URL EXISTS: "+url)
+    }
+    if (!response.ok)
+    {
+      throw new Error(response.statusText)
+    }
+  } catch (error) {
+    console.error("URL does not exist!",error);
+    return false
+  }
+  return true
+}
+const capitalize = (input) => {
+  return input.charAt(0).toUpperCase() + input.substring(1)
+}
+if (typeof window === "undefined") {
+  module.exports = {fetchSinglePlayer,fetchAllPlayers,fetchTeams,fetchTeamLookup,addNewPlayer,removePlayer,capitalize,verifyImageExists}
+}
+export {fetchSinglePlayer,fetchAllPlayers,fetchTeams,fetchTeamLookup,addNewPlayer,removePlayer,capitalize,verifyImageExists}
+export default fetchAllPlayers

@@ -1,11 +1,18 @@
 import React from "react";
 import { useEffect } from "react";
-import fetchSinglePlayer from "../go-fetch.js"
+import fetchTeams from "../go-fetch.js"
+import PuppyDisplay from "./PuppyDisplay.jsx";
 function TeamDisplay(props) {
+    const [teams, setTeams] = useState([]);
     useEffect(() => {
-        // fetchSinglePlayer()
+        fetchTeams().then((json) => {
+            setTeams(json)})
     }, []);
-    return (<><div>TBM</div></>);
+    function makeTeamFilterButtons()
+    {
+        
+    }
+    return (<><div><PuppyDisplay teamLookup={props.teamLookup} players={props.players}></PuppyDisplay></div></>);
 }
 
 export default TeamDisplay;
